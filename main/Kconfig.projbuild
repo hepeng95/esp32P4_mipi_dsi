@@ -1,0 +1,63 @@
+menu "Example Configuration"
+    config EXAMPLE_USE_DMA2D_COPY_FRAME
+        bool "Use DMA2D to copy draw buffer to frame buffer"
+        default y
+        help
+            Enable this option, DMA2D will be used to copy the LVGL draw buffer to the target frame buffer.
+            This can save some CPU time and improve the performance.
+
+    config EXAMPLE_MONITOR_REFRESH_BY_GPIO
+        bool "Monitor Refresh Rate by GPIO"
+        default y
+        help
+            Enable this option, you can visualize the refresh rate by attaching a logic analyzer to a specific GPIO.
+            The GPIO will output a square wave with the frequency equals to half of the refresh rate.
+
+    choice
+        prompt "Select MIPI LCD model"
+        default EXAMPLE_LCD_USE_ST7701
+        help
+            Select LCD controller model.
+
+        config EXAMPLE_LCD_USE_EK79007
+            bool "EK79007"
+        config EXAMPLE_LCD_USE_ILI9881C
+            bool "ILI9881C"
+        config EXAMPLE_LCD_USE_ST7701
+            bool "ST7701S"
+    endchoice
+endmenu
+
+menu "RF Link (ESP32-C5 -> ESP32-P4)"
+    config EXAMPLE_RF_SIMULATE
+        bool "Use built-in simulated data source (no C5 needed)"
+        default y
+        help
+            开启后内置任务会生成模拟的 nRF24L01 扫频数据与无人机 RID，
+            无需 ESP32-C5 即可驱动 UI。接好 C5 后取消勾选并配置 UART 引脚。
+
+    config EXAMPLE_RF_UART_PORT
+        int "UART port for C5 link"
+        default 1
+        help
+            ESP32-P4 上用于接收 C5 数据的 UART 编号（通常用 UART1）。
+
+    config EXAMPLE_RF_UART_TX_GPIO
+        int "UART TX GPIO (P4 -> C5, 可选)"
+        default -1
+        help
+            设为 -1 表示仅接收（单向）。P4 一般只接收 C5 数据，TX 可不接。
+
+    config EXAMPLE_RF_UART_RX_GPIO
+        int "UART RX GPIO (C5 -> P4)"
+        default -1
+        help
+            接 C5 的 TX。硬件确认后填入实际 GPIO。默认 -1 表示暂不启用 UART
+            （需配合上方的模拟数据源）。
+
+    config EXAMPLE_RF_UART_BAUD
+        int "UART baud rate"
+        default 460800
+        help
+            建议 460800（扫频 125 字节/帧 + RID 91 字节，460800 足够）。
+endmenu

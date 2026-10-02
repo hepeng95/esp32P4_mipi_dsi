@@ -1,0 +1,17 @@
+﻿build/
+managed_components/
+.idf_component_cache/
+.git/
+.venv/
+sdkconfig.old
+*~
+*.swp
+*.o
+*.obj
+*.elf
+*.bin
+*.map
+*.txt
+.DS_Store
+example_ref/
+sim/

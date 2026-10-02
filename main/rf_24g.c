@@ -22,11 +22,11 @@ static const char *TAG = "rf_24g";
 
 /* ====== 通道 & 采样参数 ======
  * ★ NRF24L01 RPD 只是阈值检测 (PWR > -64dBm → 1), 非真正 RSSI
- *   增加 samples 让 hits 有多档 (0~N), 映射到 0~180 防顶格
- *   降低 settle 到 100µs 让 RPD 有抖动 → 更多中间态 */
+ *   3 samples × 100µs settle → 37.8ms/帧 ≈ 26 FPS (原 160ms → 6 FPS)
+ *   hits 0~3 × 60 → 0/60/120/180 四档 (频谱显示足够) */
 #define RF2G_CHANNELS       126     /* ch0~125 → 2400~2525 MHz */
-#define RF2G_SAMPLES_PER_CH 6       /* 6 samples → hits 0~6 → 7 档灰度 */
-#define RF2G_SETTLE_US      200     /* nrf_detect_channel min 强制 200µs */
+#define RF2G_SAMPLES_PER_CH 3       /* 3 samples → hits 0~3 → ×60 得 4 档灰度 */
+#define RF2G_SETTLE_US      100     /* nRF24L01 datasheet: RPD settling = 70µs, 取 100µs */
 
 /* ====== 任务参数 ====== */
 #define RF2G_TASK_STACK     4096
@@ -73,9 +73,9 @@ static void rf_24g_task(void *arg)
             for (int s = 0; s < RF2G_SAMPLES_PER_CH; s++) {
                 if (nrf_detect_channel((uint8_t)ch, RF2G_SETTLE_US)) hits++;
             }
-            /* ★ RPD 阈值检测: hits 反映能量超阈概率, 映射 0~180 防顶格 */
-            s_rssi[ch] = (uint8_t)(hits * 180 / RF2G_SAMPLES_PER_CH);
-            if ((ch & 0xF) == 0xF) vTaskDelay(pdMS_TO_TICKS(1));   /* 每 16ch 让 LVGL UI 跑 */
+            /* ★ RPD 阈值检测: hits*60 → 0/60/120/180 四档 (3 samples) */
+            s_rssi[ch] = (uint8_t)(hits * 60);
+            /* 无 vTaskDelay — scan 在 CPU1, LVGL 在 CPU0, 不抢占 */
         }
 
         /* ====== 发布 ====== */

@@ -309,8 +309,8 @@ uint8_t nrf_detect_channel(uint8_t ch, uint32_t settle_us)
     /* nrf_flush_rx(); */
 
     /* 限制 settle: PLL 锁定 ≥ 130µs, RPD 能量累计 ≥ 70µs (datasheet min)
-     * 合计 ≥ 200µs 就够了 (之前写 300 有冗余) */
-    if (settle_us < 200)  settle_us = 200;
+     * ★ 取 max 70µs (RPD settling), 让调用方传 100µs 足够 */
+    if (settle_us < 70)  settle_us = 70;
     if (settle_us > 10000) settle_us = 10000;
 
     ce_high();

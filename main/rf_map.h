@@ -100,8 +100,11 @@ double rf_map_lat_to_tile_y(double lat_deg, int zoom);
 /* 触摸拖动: 更新 tile_slot 偏移 + 重算 center_lat/lon, 不立即重读 SD */
 void rf_map_pan(rf_map_view_t *view, int dx_px, int dy_px);
 
-/* 缩放: zoom += delta, 范围 [12, 19], 立即重渲染 */
+/* 缩放: zoom += delta, 范围 [10, 19], 保持 canvas 中心地理点不变 */
 void rf_map_zoom(rf_map_view_t *view, int delta);
+
+/* 回中: 回到默认/指定中心 (保留当前 zoom) */
+void rf_map_home(rf_map_view_t *view, double lat, double lon);
 
 /* Project a lat/lon onto the canvas slot. Returns false if point falls outside the tile. */
 bool rf_map_project(const rf_map_view_t *view, double lat, double lon,
